@@ -4,36 +4,521 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sohrab Sheikhani</title>
-  <meta name="description" content="Sohrab Sheikhani — creator based in San Diego, focused on CCaaS and Voice AI.">
+  <meta name="description" content="Sohrab Sheikhani, Co-Founder and CTO of Aloware. Leading the engineering behind the modern contact center: calling, texting, and AI agents inside the CRM.">
   <link rel="canonical" href="https://sohrabz.github.io/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme: light dark; }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; display: grid; place-items: center;
-      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #0d1117; color: #e6edf3; padding: 2rem;
+    :root {
+      --bg: #0b0b0c;
+      --surface: #121214;
+      --line: #222226;
+      --ink: #efede8;
+      --dim: #85858d;
+      --faint: #55555c;
+      --amber: #e2a144;
+      --green: #34d399;
+      --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --serif: "Newsreader", Georgia, serif;
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
     }
-    main { max-width: 32rem; }
-    h1 { font-size: 2rem; margin: 0 0 .25rem; letter-spacing: -0.02em; }
-    .tag { color: #8b949e; margin: 0 0 1.5rem; }
-    p { margin: 0 0 1.25rem; }
-    ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .75rem; }
-    a { color: #58a6ff; text-decoration: none; border: 1px solid #30363d; border-radius: 8px;
-        padding: .5rem .9rem; display: inline-block; transition: border-color .15s, background .15s; }
-    a:hover { border-color: #58a6ff; background: rgba(88,166,255,.08); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 16px/1.65 var(--sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    ::selection { background: rgba(226, 161, 68, .25); }
+
+    .col { max-width: 660px; margin: 0 auto; padding: 0 24px; }
+
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 2px; }
+
+    /* ---------- load orchestration ---------- */
+    .in {
+      opacity: 0;
+      transform: translateY(10px);
+      filter: blur(5px);
+      animation: enter .9s var(--ease) forwards;
+      animation-delay: calc(var(--i, 0) * 90ms);
+    }
+    @keyframes enter {
+      to { opacity: 1; transform: none; filter: none; }
+    }
+
+    /* scroll reveals */
+    .rv { opacity: 0; transform: translateY(14px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+    .rv.on { opacity: 1; transform: none; }
+
+    /* ---------- header / status line ---------- */
+    header { padding: 56px 0 0; }
+    .status {
+      display: flex; align-items: center; gap: 10px;
+      font: 400 12px/1 var(--mono);
+      color: var(--dim);
+      letter-spacing: .04em;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(52, 211, 153, .5);
+      animation: pulse 2.6s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, .45); }
+      70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+    }
+    .status .sep { color: var(--faint); }
+
+    h1 {
+      margin-top: 40px;
+      font: 600 clamp(30px, 6vw, 44px)/1.18 var(--sans);
+      letter-spacing: -0.025em;
+      text-wrap: balance;
+    }
+    h1 em {
+      font: italic 500 1.05em/1 var(--serif);
+      color: var(--amber);
+      letter-spacing: 0;
+      padding-right: .04em;
+    }
+    .lede {
+      margin-top: 22px;
+      color: var(--dim);
+      font-size: 18px;
+      max-width: 56ch;
+      text-wrap: pretty;
+    }
+    .lede strong { color: var(--ink); font-weight: 500; }
+
+    /* ---------- IVR ---------- */
+    .ivr {
+      margin-top: 56px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .ivr-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      font: 400 12px/1 var(--mono);
+      color: var(--dim);
+      letter-spacing: .04em;
+    }
+    .ivr-head button {
+      all: unset;
+      cursor: pointer;
+      font: inherit;
+      color: var(--faint);
+      transition: color .25s var(--ease);
+    }
+    .ivr-head button:hover { color: var(--ink); }
+    .ivr-head button[aria-pressed="true"] { color: var(--amber); }
+
+    #scope { display: block; width: 100%; height: 56px; border-bottom: 1px solid var(--line); }
+
+    .pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 16px;
+    }
+    .pk {
+      all: unset;
+      box-sizing: border-box;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      min-height: 62px;
+      border: 1px solid var(--line);
+      border-bottom-width: 2px;
+      border-radius: 10px;
+      background: var(--bg);
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .12s ease, border-color .3s var(--ease), background .3s var(--ease);
+    }
+    .pk:hover { border-color: var(--faint); background: rgba(255, 255, 255, .02); }
+    .pk:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+    .pk.pressed { transform: translateY(1px); border-bottom-width: 1px; border-color: var(--amber); }
+    .pk .d { font: 500 17px/1 var(--mono); color: var(--ink); }
+    .pk .l { font: 400 9px/1 var(--mono); letter-spacing: .12em; color: var(--faint); text-transform: uppercase; }
+    .pk[data-nav] .l { color: var(--amber); }
+    .pk.pressed .d { color: var(--amber); }
+    .hint {
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      font: 400 12px/1.5 var(--mono);
+      color: var(--faint);
+      letter-spacing: .03em;
+    }
+    @media (hover: none) { .hint .kb { display: none; } }
+
+    /* ---------- sections ---------- */
+    section { padding-top: 96px; }
+    .eyebrow {
+      display: flex; align-items: baseline; gap: 12px;
+      font: 400 12px/1 var(--mono);
+      color: var(--faint);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--line); align-self: center; }
+    .eyebrow b { color: var(--amber); font-weight: 500; }
+    h2 {
+      margin-top: 18px;
+      font: 500 28px/1.3 var(--sans);
+      letter-spacing: -0.02em;
+    }
+    h2 em { font: italic 500 1.08em/1 var(--serif); color: var(--dim); }
+    .body { margin-top: 14px; color: var(--dim); text-wrap: pretty; }
+    .body a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--faint); transition: border-color .25s var(--ease); }
+    .body a:hover { border-color: var(--amber); }
+
+    .facts { margin-top: 28px; list-style: none; }
+    .facts li {
+      display: flex; gap: 14px;
+      padding: 13px 0;
+      border-top: 1px solid var(--line);
+      font-size: 15px;
+      color: var(--dim);
+    }
+    .facts li:last-child { border-bottom: 1px solid var(--line); }
+    .facts .k { flex: none; width: 130px; font: 400 12px/1.8 var(--mono); color: var(--faint); letter-spacing: .04em; }
+    .facts .v strong { color: var(--ink); font-weight: 500; }
+
+    /* project rows */
+    .projects { margin-top: 28px; list-style: none; }
+    .projects li { border-top: 1px solid var(--line); }
+    .projects li:last-child { border-bottom: 1px solid var(--line); }
+    .projects a {
+      display: block;
+      padding: 16px 0;
+      text-decoration: none;
+    }
+    .projects .name, .projects .desc { transition: transform .35s var(--ease); }
+    .projects a:hover .name, .projects a:hover .desc { transform: translateX(10px); }
+    .projects .name {
+      display: flex; align-items: baseline; gap: 10px;
+      font: 500 15px/1.4 var(--sans);
+    }
+    .projects .name .lang { font: 400 11px/1 var(--mono); color: var(--faint); letter-spacing: .04em; }
+    .projects .name .arr { margin-left: auto; color: var(--faint); font: 400 13px/1 var(--mono); transition: transform .35s var(--ease), color .35s var(--ease); }
+    .projects a:hover .arr { transform: translateX(4px); color: var(--amber); }
+    .projects .desc { display: block; margin-top: 4px; color: var(--dim); font-size: 14px; max-width: 58ch; }
+
+    .oss-note { margin-top: 16px; font: 400 13px/1.7 var(--mono); color: var(--faint); }
+    .oss-note code { color: var(--amber); }
+
+    /* connect */
+    .links { margin-top: 28px; list-style: none; }
+    .links li { border-top: 1px solid var(--line); }
+    .links li:last-child { border-bottom: 1px solid var(--line); }
+    .links a {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0;
+      text-decoration: none;
+      font-size: 15px;
+    }
+    .links .k, .links .v { transition: transform .35s var(--ease); }
+    .links a:hover .k, .links a:hover .v { transform: translateX(10px); }
+    .links .k { flex: none; width: 130px; font: 400 12px/1 var(--mono); color: var(--faint); letter-spacing: .04em; }
+    .links .v { color: var(--ink); }
+    .links .arr { margin-left: auto; color: var(--faint); font: 400 13px/1 var(--mono); transition: transform .35s var(--ease), color .35s var(--ease); }
+    .links a:hover .arr { transform: translateX(4px); color: var(--amber); }
+
+    footer {
+      margin-top: 110px;
+      padding: 26px 0 48px;
+      border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; gap: 16px;
+      font: 400 12px/1.6 var(--mono);
+      color: var(--faint);
+      letter-spacing: .03em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .in { animation: none; opacity: 1; transform: none; filter: none; }
+      .rv { opacity: 1; transform: none; transition: none; }
+      .dot { animation: none; }
+      * { transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Sohrab Sheikhani</h1>
-    <p class="tag">Creator based in San Diego, CA.</p>
-    <p>I work across product and engineering, focused on CCaaS and Voice AI. I also build the occasional side project for fun.</p>
-    <ul>
-      <li><a href="https://github.com/SohrabZ" rel="me">GitHub</a></li>
-      <li><a href="https://www.linkedin.com/in/sohrabz/" rel="me">LinkedIn</a></li>
-      <li><a href="https://twitter.com/_sohrabz_" rel="me">X / Twitter</a></li>
-    </ul>
-  </main>
+
+  <div class="col">
+    <header>
+      <div class="status in" style="--i:0">
+        <span class="dot" aria-hidden="true"></span>
+        <span>LINE OPEN</span>
+        <span class="sep">/</span>
+        <span>SAN DIEGO, CA</span>
+        <span class="sep">/</span>
+        <span id="clock" aria-hidden="true"></span>
+      </div>
+
+      <h1 class="in" style="--i:1">You've reached Sohrab Sheikhani.<br>I lead the engineering behind <em>the modern contact center.</em></h1>
+
+      <p class="lede in" style="--i:2">
+        Co-founder and CTO of <strong><a href="https://aloware.com" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--faint)">Aloware</a></strong>,
+        an AI-driven phone system embedded in the CRM. I built the team, the architecture,
+        and most of the early code. I still write the code.
+      </p>
+
+      <nav class="ivr in" style="--i:3" aria-label="Site menu">
+        <div class="ivr-head">
+          <span>MAIN MENU</span>
+          <button id="mute" aria-pressed="true" aria-label="Toggle key tones">TONES ON</button>
+        </div>
+        <canvas id="scope" width="1320" height="112" aria-hidden="true"></canvas>
+        <div class="pad">
+          <a class="pk" href="#lead" data-digit="1" data-nav><span class="d">1</span><span class="l">What I lead</span></a>
+          <a class="pk" href="#oss" data-digit="2" data-nav><span class="d">2</span><span class="l">Open source</span></a>
+          <a class="pk" href="#shipping" data-digit="3" data-nav><span class="d">3</span><span class="l">Still shipping</span></a>
+          <a class="pk" href="#connect" data-digit="4" data-nav><span class="d">4</span><span class="l">Connect</span></a>
+          <button class="pk" data-digit="5"><span class="d">5</span><span class="l">JKL</span></button>
+          <button class="pk" data-digit="6"><span class="d">6</span><span class="l">MNO</span></button>
+          <button class="pk" data-digit="7"><span class="d">7</span><span class="l">PQRS</span></button>
+          <button class="pk" data-digit="8"><span class="d">8</span><span class="l">TUV</span></button>
+          <button class="pk" data-digit="9"><span class="d">9</span><span class="l">WXYZ</span></button>
+          <button class="pk" data-digit="*"><span class="d">*</span><span class="l">Tones</span></button>
+          <a class="pk" href="mailto:sohrab@aloware.com" data-digit="0"><span class="d">0</span><span class="l">Operator</span></a>
+          <button class="pk" data-digit="#"><span class="d">#</span><span class="l">Menu</span></button>
+        </div>
+        <div class="hint"><span class="kb">Dial from your keyboard, or tap. </span>1&ndash;4 navigate, 0 reaches the operator, # returns to the menu. Every tone is real DTMF, drawn as it sounds.</div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="lead" class="rv">
+        <div class="eyebrow"><span>YOU PRESSED</span><b>1</b><span>/ WHAT I LEAD</span></div>
+        <h2>A cloud contact center for revenue teams, <em>native inside the CRM.</em></h2>
+        <p class="body">
+          Calling, texting, and AI voice agents inside HubSpot and other CRMs.
+          I own the technical direction end to end: telephony, media, AI, and the platform underneath.
+        </p>
+        <ul class="facts">
+          <li><span class="k">FOUNDED</span><span class="v"><strong>2017</strong>, bootstrapped to profitability. Pre-Series A and cash-flow positive</span></li>
+          <li><span class="k">SCALE</span><span class="v"><strong>1,000+ sales teams</strong> running their daily call and SMS volume on the platform</span></li>
+          <li><span class="k">AI</span><span class="v"><strong>AI-first since 2023</strong>: SMS bots, autonomous voice agents, and AI receptionists in production</span></li>
+          <li><span class="k">TEAM</span><span class="v"><strong>Distributed engineering org</strong> across the US, LATAM, and Europe. Remote since day one</span></li>
+        </ul>
+        <p class="body" style="margin-top:26px">
+          How I work: hands-on. I set architecture, review code, and take on-call.
+          Small senior teams over large ones, buy the boring and build the edge,
+          and bet early on new primitives. Real-time voice AI, LLM agents, and MCP
+          were side projects here before they were roadmap items.
+        </p>
+      </section>
+
+      <section id="oss" class="rv">
+        <div class="eyebrow"><span>YOU PRESSED</span><b>2</b><span>/ OPEN SOURCE</span></div>
+        <h2>Noise cancellation that <em>never leaves your server.</em></h2>
+        <p class="body">
+          <a href="https://github.com/aloware/livekit-plugins-dtln">livekit-plugins-dtln</a> is self-hosted
+          noise cancellation for LiveKit, released by Aloware. In-process ONNX inference at ~8ms latency,
+          no cloud calls, MIT licensed. A free alternative to LiveKit Cloud + Krisp.
+        </p>
+        <p class="oss-note">$ <code>pip install livekit-plugins-dtln</code></p>
+      </section>
+
+      <section id="shipping" class="rv">
+        <div class="eyebrow"><span>YOU PRESSED</span><b>3</b><span>/ STILL SHIPPING</span></div>
+        <h2>Small things, built <em>end to end.</em></h2>
+        <p class="body">
+          Nights and weekends I ship complete little tools. It keeps my judgment calibrated
+          when I'm reviewing someone else's design doc.
+        </p>
+        <ul class="projects">
+          <li><a href="https://github.com/SohrabZ/swiftui-macos-app">
+            <span class="name">swiftui-macos-app <span class="lang">SWIFT</span><span class="arr">&rarr;</span></span>
+            <span class="desc">A modern macOS app template in pure SwiftUI. Liquid Glass, adaptive themes, Sparkle updates, no Xcode project</span>
+          </a></li>
+          <li><a href="https://github.com/SohrabZ/x-browser-mcp">
+            <span class="name">x-browser-mcp <span class="lang">GO</span><span class="arr">&rarr;</span></span>
+            <span class="desc">Read and post to X from your own logged-in browser, exposed to local AI agents over MCP. No API keys</span>
+          </a></li>
+          <li><a href="https://github.com/SohrabZ/liquid-glass-skills">
+            <span class="name">liquid-glass-skills <span class="lang">SWIFT</span><span class="arr">&rarr;</span></span>
+            <span class="desc">Agent skills for building iOS 26 Liquid Glass UIs with SwiftUI + UIKit</span>
+          </a></li>
+          <li><a href="https://github.com/SohrabZ/stock-tracker">
+            <span class="name">stock-tracker <span class="lang">GO</span><span class="arr">&rarr;</span></span>
+            <span class="desc">CLI stock trend monitor. Trend and volume signals, position P&amp;L, cron-friendly</span>
+          </a></li>
+          <li><a href="https://github.com/SohrabZ/buzz-agent-teams">
+            <span class="name">buzz-agent-teams <span class="lang">SHELL</span><span class="arr">&rarr;</span></span>
+            <span class="desc">Two ready-to-import agent teams for Buzz: a standing Hive and a disposable Swarm</span>
+          </a></li>
+        </ul>
+      </section>
+
+      <section id="connect" class="rv">
+        <div class="eyebrow"><span>YOU PRESSED</span><b>4</b><span>/ CONNECT</span></div>
+        <h2>The line is <em>open.</em></h2>
+        <p class="body">
+          Always happy to talk to engineers who want to work on real-time voice AI.
+          <a href="https://aloware.com/careers">We're hiring.</a>
+        </p>
+        <ul class="links">
+          <li><a href="https://github.com/SohrabZ"><span class="k">GITHUB</span><span class="v">github.com/SohrabZ</span><span class="arr">&rarr;</span></a></li>
+          <li><a href="https://www.linkedin.com/in/sohrabz/"><span class="k">LINKEDIN</span><span class="v">linkedin.com/in/sohrabz</span><span class="arr">&rarr;</span></a></li>
+          <li><a href="https://twitter.com/_sohrabz_"><span class="k">X / TWITTER</span><span class="v">@_sohrabz_</span><span class="arr">&rarr;</span></a></li>
+          <li><a href="mailto:sohrab@aloware.com"><span class="k">EMAIL</span><span class="v">sohrab@aloware.com</span><span class="arr">&rarr;</span></a></li>
+          <li><a href="https://aloware.com"><span class="k">COMPANY</span><span class="v">aloware.com</span><span class="arr">&rarr;</span></a></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <span>&copy; <span id="yr"></span> SOHRAB SHEIKHANI</span>
+      <span>END OF CALL</span>
+    </footer>
+  </div>
+
+  <script>
+    // ---------- clock ----------
+    const clock = document.getElementById('clock');
+    const tick = () => {
+      clock.textContent = new Date().toLocaleTimeString('en-US', {
+        timeZone: 'America/Los_Angeles', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }) + ' PT';
+    };
+    tick(); setInterval(tick, 1000);
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // ---------- scroll reveals ----------
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+    // ---------- DTMF + oscilloscope ----------
+    // Real DTMF pairs: row tone + column tone (Hz)
+    const DTMF = {
+      '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+      '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+      '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+      '*': [941, 1209], '0': [941, 1336], '#': [941, 1477]
+    };
+    let ctx = null, muted = false;
+    let vis = { active: false, f1: 0, f2: 0, start: 0 };
+
+    const muteBtn = document.getElementById('mute');
+    muteBtn.addEventListener('click', () => setTones(muted));
+
+    function playTone(d) {
+      const [f1, f2] = DTMF[d];
+      vis = { active: true, f1, f2, start: performance.now() };
+      if (reduced) requestAnimationFrame(draw); // loop is parked when motion is reduced
+      if (muted) return;
+      try {
+        ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+        g.connect(ctx.destination);
+        [f1, f2].forEach(f => {
+          const o = ctx.createOscillator();
+          o.frequency.value = f; o.type = 'sine';
+          o.connect(g); o.start(); o.stop(ctx.currentTime + 0.24);
+        });
+      } catch (e) { /* audio unavailable; scope still draws */ }
+    }
+
+    // canvas oscilloscope: draws the summed sine pair, decaying after each press
+    const cv = document.getElementById('scope');
+    const cx = cv.getContext('2d');
+    const DPR = Math.min(devicePixelRatio || 1, 2);
+    function sizeCanvas() {
+      const w = cv.clientWidth;
+      cv.width = w * DPR; cv.height = 56 * DPR;
+    }
+    sizeCanvas(); addEventListener('resize', sizeCanvas);
+
+    function draw(now) {
+      const W = cv.width, H = cv.height, mid = H / 2;
+      cx.clearRect(0, 0, W, H);
+      cx.lineWidth = 1.4 * DPR;
+
+      let amp = 0, f1 = 0, f2 = 0;
+      if (vis.active) {
+        const t = (now - vis.start) / 1000;
+        if (t < 1.15) { amp = Math.exp(-t * 3.4); f1 = vis.f1; f2 = vis.f2; }
+        else vis.active = false;
+      }
+
+      cx.beginPath();
+      const idle = reduced ? 0 : 0.6 * DPR; // faint ambient ripple
+      for (let x = 0; x <= W; x += 2) {
+        const p = x / W;
+        let y = mid;
+        if (amp > 0) {
+          // sum of the two real DTMF sines, spatialized across the strip
+          y += (Math.sin(p * f1 * 0.055) + Math.sin(p * f2 * 0.055)) * amp * H * 0.20;
+        } else if (idle) {
+          y += Math.sin(p * 18 + now / 900) * idle;
+        }
+        x === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+      }
+      const glow = amp > 0 ? Math.min(1, amp + .15) : 0.35;
+      cx.strokeStyle = amp > 0
+        ? `rgba(226, 161, 68, ${glow})`
+        : 'rgba(133, 133, 141, 0.35)';
+      cx.stroke();
+      if (!reduced || vis.active) requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // ---------- dial: keys + taps, one path ----------
+    function setTones(on) {
+      muted = !on;
+      muteBtn.textContent = muted ? 'TONES OFF' : 'TONES ON';
+      muteBtn.setAttribute('aria-pressed', String(!muted));
+    }
+    function pressVisual(d) {
+      const k = document.querySelector(`.pk[data-digit="${CSS.escape(d)}"]`);
+      if (!k) return;
+      k.classList.add('pressed');
+      setTimeout(() => k.classList.remove('pressed'), 240);
+    }
+    function dial(d) {
+      playTone(d); pressVisual(d);
+      const k = document.querySelector(`.pk[data-digit="${CSS.escape(d)}"]`);
+      if (k && k.hasAttribute('data-nav')) {
+        const target = document.querySelector(k.getAttribute('href'));
+        setTimeout(() => target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }), 180);
+      } else if (d === '#') {
+        setTimeout(() => scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' }), 180);
+      } else if (d === '*') {
+        setTones(muted); // toggle
+      } else if (d === '0') {
+        setTimeout(() => { location.href = 'mailto:sohrab@aloware.com'; }, 240);
+      }
+    }
+    addEventListener('keydown', e => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'BUTTON' || t.tagName === 'A')) {
+        if (e.key === 'Enter' || e.key === ' ') return; // let focused controls activate natively
+      }
+      if (DTMF[e.key]) dial(e.key);
+    });
+    document.querySelectorAll('.pk').forEach(k => {
+      k.addEventListener('click', e => { e.preventDefault(); dial(k.dataset.digit); });
+    });
+  </script>
 </body>
 </html>
