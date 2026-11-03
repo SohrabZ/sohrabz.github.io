@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aloware MCP · Sohrab Sheikhani</title>
+  <meta name="description" content="Aloware's MCP server lets Claude and other assistants work inside an Aloware account as the person who signed in: 167 tools, the page's own permission checks, and previews before anything that can't be undone.">
+  <link rel="canonical" href="https://sohrabz.github.io/writing/aloware-mcp/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../post.css">
+</head>
+<body>
+  <div class="col">
+    <nav class="top" aria-label="Site">
+      <a href="/"><span class="arr">&larr;</span>SOHRAB SHEIKHANI</a>
+      <a href="/#writing">WRITING</a>
+    </nav>
+
+    <header class="post">
+      <div class="eyebrow"><span>WRITING</span><b>03</b><span>/ MCP</span></div>
+      <h1>Aloware MCP: <em>Claude inside a contact center.</em></h1>
+      <p class="lede">
+        Aloware's MCP server lets Claude, Claude Code and other assistants work in an Aloware account: send texts,
+        look up contacts, pull reports, build flows and set the account up. It acts as the person who signed in,
+        and it also powers our own <a href="../ai-assistant/" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--faint)">AI Assistant</a>.
+      </p>
+      <p class="meta">2026-11-02 &middot; Written with Claude from the code, commit history and product docs.</p>
+    </header>
+
+    <article>
+      <h2>The short version</h2>
+      <ul class="stats">
+        <li><span class="k">Tools</span><span class="v"><strong>167 tools</strong> in 9 groups, plus 6 guides and a flow-design prompt</span></li>
+        <li><span class="k">Who</span><span class="v">Customers through <strong>claude.ai connectors</strong>, Claude Code or any MCP client; our AI Assistant runs the same tools in-process</span></li>
+        <li><span class="k">Sign-in</span><span class="v"><strong>OAuth 2.1</strong> with PKCE and dynamic client registration. &ldquo;There is no token to copy.&rdquo;</span></li>
+        <li><span class="k">Built</span><span class="v"><strong>2026-02-19 to today.</strong> 214 of 232 commits are mine, most of them in October</span></li>
+        <li><span class="k">Tests</span><span class="v"><strong>631</strong> test methods in 52 files</span></li>
+        <li><span class="k">Public</span><span class="v"><a href="https://support.aloware.com/en/articles/14708031-how-to-connect-claude-ai-to-aloware-mcp">How to connect Claude to Aloware</a>, on the help center</span></li>
+      </ul>
+
+      <figure>
+        <div class="frame"><svg class="fig" viewBox="0 0 760 302" role="img" aria-label="MCP tools grew from 14 in February to 167 in November">
+<line class="grid" x1="320.0" x2="320.0" y1="16" y2="278"/>
+<text class="f" x="320.0" y="294" text-anchor="middle" font-size="11">0</text>
+<line class="grid" x1="435.0" x2="435.0" y1="16" y2="278"/>
+<text class="f" x="435.0" y="294" text-anchor="middle" font-size="11">50</text>
+<line class="grid" x1="550.0" x2="550.0" y1="16" y2="278"/>
+<text class="f" x="550.0" y="294" text-anchor="middle" font-size="11">100</text>
+<line class="grid" x1="665.0" x2="665.0" y1="16" y2="278"/>
+<text class="f" x="665.0" y="294" text-anchor="middle" font-size="11">150</text>
+<text class="f" x="24" y="39" font-size="11.5" style="font-family:var(--mono)">Feb 20</text>
+<text class="q" x="84" y="39" font-size="12.5">Three servers</text>
+<rect class="pm" x="320" y="28" width="32.2" height="16" rx="3"/>
+<text class="t" x="360.2" y="40" font-size="12" font-weight="500">14</text>
+<text class="f" x="24" y="73" font-size="11.5" style="font-family:var(--mono)">May 1</text>
+<text class="q" x="84" y="73" font-size="12.5">One /mcp endpoint for Claude</text>
+<rect class="pm" x="320" y="62" width="32.2" height="16" rx="3"/>
+<text class="t" x="360.2" y="74" font-size="12" font-weight="500">14</text>
+<text class="f" x="24" y="107" font-size="11.5" style="font-family:var(--mono)">Oct 9</text>
+<text class="q" x="84" y="107" font-size="12.5">First flow tools</text>
+<rect class="pm" x="320" y="96" width="57.5" height="16" rx="3"/>
+<text class="t" x="385.5" y="108" font-size="12" font-weight="500">25</text>
+<text class="f" x="24" y="141" font-size="11.5" style="font-family:var(--mono)">Oct 17</text>
+<text class="q" x="84" y="141" font-size="12.5">Build and publish flows</text>
+<rect class="pm" x="320" y="130" width="115.0" height="16" rx="3"/>
+<text class="t" x="443.0" y="142" font-size="12" font-weight="500">50</text>
+<text class="f" x="24" y="175" font-size="11.5" style="font-family:var(--mono)">Oct 20</text>
+<text class="q" x="84" y="175" font-size="12.5">The AI Assistant joins</text>
+<rect class="pm" x="320" y="164" width="149.5" height="16" rx="3"/>
+<text class="t" x="477.5" y="176" font-size="12" font-weight="500">65</text>
+<text class="f" x="24" y="209" font-size="11.5" style="font-family:var(--mono)">Oct 24</text>
+<text class="q" x="84" y="209" font-size="12.5">Account setup</text>
+<rect class="pm" x="320" y="198" width="200.1" height="16" rx="3"/>
+<text class="t" x="528.1" y="210" font-size="12" font-weight="500">87</text>
+<text class="f" x="24" y="243" font-size="11.5" style="font-family:var(--mono)">Oct 25</text>
+<text class="q" x="84" y="243" font-size="12.5">Contacts, AI agents, settings</text>
+<rect class="pm" x="320" y="232" width="342.7" height="16" rx="3"/>
+<text class="t" x="670.7" y="244" font-size="12" font-weight="500">149</text>
+<text class="f" x="24" y="277" font-size="11.5" style="font-family:var(--mono)">Nov 2</text>
+<text class="t" x="84" y="277" font-size="12.5">Today</text>
+<rect class="pa" x="320" y="266" width="384.1" height="16" rx="3"/>
+<text class="a" x="712.1" y="278" font-size="12" font-weight="600">167</text>
+</svg></div>
+        <figcaption>Tools on the MCP server at each milestone, 2026. February counts three servers that later became one.</figcaption>
+      </figure>
+
+      <h2>What customers can do</h2>
+      <p>
+        A user asks their assistant in plain language, and it does the work in Aloware. The tools fall into nine groups:
+      </p>
+      <div class="scroll"><table>
+        <thead><tr><th>Group</th><th>Tools</th><th>For example</th></tr></thead>
+        <tbody>
+          <tr><td>Flows</td><td class="n">53</td><td>Read, build, test and publish automation and voice flows; simulate calls that ring no one</td></tr>
+          <tr><td>Account setup</td><td class="n">32</td><td>Lines, inboxes, users, teams, tags, lists and imports; restoring deleted records</td></tr>
+          <tr><td>Operations</td><td class="n">19</td><td>Users, teams, lists and tags; Power Dialer lists; inbox availability; the audit log</td></tr>
+          <tr><td>Account settings</td><td class="n">19</td><td>Account settings, holidays, dispositions, custom fields, call scripts and SMS templates</td></tr>
+          <tr><td>Reports</td><td class="n">15</td><td>Dashboard and Insights numbers, communication logs and exports; reviewing one call or text</td></tr>
+          <tr><td>Integrations</td><td class="n">10</td><td>CRM settings, calendar apps, webhooks</td></tr>
+          <tr><td>Contacts</td><td class="n">7</td><td>Create and look up contacts; enroll them in sequences; number lookups</td></tr>
+          <tr><td>AI agents</td><td class="n">7</td><td>Create, update, copy and publish AloAi agents; add knowledge files</td></tr>
+          <tr><td>Communication</td><td class="n">5</td><td>Texts, ringless voicemail, two-legged calls, AI agent calls</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Act as a person, not an account</h2>
+      <p>
+        The first version took an account's API token. That made every caller the whole account. Usage data showed
+        token clients calling only about 9 tools, so almost everything moved behind OAuth, and tokens are marked
+        deprecated. A token now sees 14 tools; a signed-in user sees what their role and the account's features allow.
+      </p>
+      <blockquote>The assistant acts as the user who signed in. It sees only what that user sees, does only what their role allows, and every change it makes carries their name in the audit log.</blockquote>
+      <p>
+        Each account also has its own MCP switch, checked on every call and on the OAuth consent screen, and
+        suspended users are refused.
+      </p>
+
+      <h2>The same checks as the page</h2>
+      <p>
+        I didn't want a second copy of the business logic that could drift from the app. The first tools called the
+        existing public API's controllers. For account setup, pulling services out of the controllers meant rewriting
+        about 1,000 lines of the riskiest code, so the tools run the admin page's own route in-process, as the admin.
+        Validation, permissions and the audit log are the page's, and the log names the person.
+      </p>
+
+      <h2>Built for an agent that can be wrong</h2>
+      <p>An assistant will sometimes pick the wrong record, invent a value or act on text it read. The server is shaped around that:</p>
+      <ul>
+        <li><strong>Hints on every tool.</strong> 64 tools are marked read-only and 51 destructive, so a client can decide what needs a person's OK.</li>
+        <li><strong>Instructions that set limits.</strong> &ldquo;Never invent an id, and never write message text the person did not give.&rdquo; A test fails if the instructions name a tool the server doesn't have.</li>
+        <li><strong>Preview, then confirm.</strong> Publishing a flow, enrolling contacts in bulk, and setup steps such as buying a line or adding a user first return a preview and a hash. They act only when called again with that hash, so the change that runs is the one the person saw.</li>
+        <li><strong>No lost edits.</strong> Every edit to a flow draft sends the draft's last hash and is refused if the draft changed meanwhile.</li>
+        <li><strong>Undo.</strong> Every change an assistant makes to a flow is kept as a labeled version that can be restored, grouped by answer or working session so one answer doesn't leave dozens of versions. Deleted records can be restored too.</li>
+        <li><strong>Things it won't do.</strong> No keys, passwords or tokens, no connecting apps, no billing changes, and no deleting, pausing or disconnecting setup records.</li>
+        <li><strong>Calls that ring no one.</strong> A voice flow can be tested with simulated calls, each run inside a rolled-back transaction. An AI can play the caller and grade the result.</li>
+      </ul>
+
+      <h2>Knowing how it's used</h2>
+      <p>
+        The MCP package fires no events when a tool runs, so the server wraps its tool handler: every call, refused
+        or not, writes a row with the account, user, role, sign-in kind, client, tool, outcome and duration, kept for
+        90 days. That log is what showed token clients barely used most tools, and it tells the AI Assistant's calls
+        apart from outside clients. Rate limits sit on top: per token, per address, and tighter ones for flow writes,
+        report reads, setup writes, exports and line purchases.
+      </p>
+
+      <h2>What carried over</h2>
+      <ul>
+        <li><strong>The page's code path.</strong> Tools that replay the app's own routes get the page's validation and permission checks, and its fixes, without a second copy.</li>
+        <li><strong>A person, not an account.</strong> Account-wide tokens can't say who did something. Signing in the person puts their name on every change.</li>
+        <li><strong>Log before you decide.</strong> The call log turned &ldquo;who should get MCP?&rdquo; from a guess into a query.</li>
+        <li><strong>One server, one set of tools.</strong> Four domain servers became one, and the in-app assistant uses it too, so a fix lands everywhere at once.</li>
+      </ul>
+
+      <ul class="next" aria-label="More writing">
+        <li><a href="../classifier-gated-agent-actions/"><span class="name">Classifier-gated agent actions<span class="arr">&rarr;</span></span><span class="desc">200 cases against the classifier that lets an AI agent act without asking: its blind spot, and the per-value check that fixed most of it.</span></a></li>
+        <li><a href="../ai-assistant/"><span class="name">An AI assistant that works the account<span class="arr">&rarr;</span></span><span class="desc">A chat panel that answers from an account's own data and changes it, on the same tools as our MCP server, measured fix by fix.</span></a></li>
+        <li><a href="../slack-bot/"><span class="name">Aloware Bot<span class="arr">&rarr;</span></span><span class="desc">An AI teammate in our Slack that reads accounts for admins, changes nothing, and keeps account data away from the web.</span></a></li>
+      </ul>
+    </article>
+
+    <footer>
+      <span>&copy; 2026 SOHRAB SHEIKHANI</span>
+      <a href="/">&larr; MAIN MENU</a>
+    </footer>
+  </div>
+</body>
+</html>

@@ -282,10 +282,10 @@
         <canvas id="scope" width="1320" height="112" aria-hidden="true"></canvas>
         <div class="pad">
           <a class="pk" href="#lead" data-digit="1" data-nav><span class="d">1</span><span class="l">What I lead</span></a>
-          <a class="pk" href="#oss" data-digit="2" data-nav><span class="d">2</span><span class="l">Open source</span></a>
-          <a class="pk" href="#shipping" data-digit="3" data-nav><span class="d">3</span><span class="l">Still shipping</span></a>
-          <a class="pk" href="#connect" data-digit="4" data-nav><span class="d">4</span><span class="l">Connect</span></a>
-          <button class="pk" data-digit="5"><span class="d">5</span><span class="l">JKL</span></button>
+          <a class="pk" href="#writing" data-digit="2" data-nav><span class="d">2</span><span class="l">Writing</span></a>
+          <a class="pk" href="#oss" data-digit="3" data-nav><span class="d">3</span><span class="l">Open source</span></a>
+          <a class="pk" href="#shipping" data-digit="4" data-nav><span class="d">4</span><span class="l">Still shipping</span></a>
+          <a class="pk" href="#connect" data-digit="5" data-nav><span class="d">5</span><span class="l">Connect</span></a>
           <button class="pk" data-digit="6"><span class="d">6</span><span class="l">MNO</span></button>
           <button class="pk" data-digit="7"><span class="d">7</span><span class="l">PQRS</span></button>
           <button class="pk" data-digit="8"><span class="d">8</span><span class="l">TUV</span></button>
@@ -294,7 +294,7 @@
           <a class="pk" href="mailto:sohrab@aloware.com" data-digit="0"><span class="d">0</span><span class="l">Operator</span></a>
           <button class="pk" data-digit="#"><span class="d">#</span><span class="l">Menu</span></button>
         </div>
-        <div class="hint"><span class="kb">Dial from your keyboard, or tap. </span>1&ndash;4 navigate, 0 reaches the operator, # returns to the menu. Every tone is real DTMF, drawn as it sounds.</div>
+        <div class="hint"><span class="kb">Dial from your keyboard, or tap. </span>1&ndash;5 navigate, 0 reaches the operator, # returns to the menu. Every tone is real DTMF, drawn as it sounds.</div>
       </nav>
     </header>
 
@@ -320,8 +320,34 @@
         </p>
       </section>
 
+      <section id="writing" class="rv">
+        <div class="eyebrow"><span>YOU PRESSED</span><b>2</b><span>/ WRITING</span></div>
+        <h2>Field notes on AI <em>that takes action.</em></h2>
+        <p class="body">
+          What I built for AI agents at Aloware, how it decides when to ask first, and what the measurements showed.
+        </p>
+        <ul class="projects">
+          <li><a href="writing/classifier-gated-agent-actions/">
+            <span class="name">Classifier-gated agent actions <span class="lang">AI CONTROL</span><span class="arr">&rarr;</span></span>
+            <span class="desc">200 cases against the classifier that lets an AI agent act without asking: its blind spot, and the per-value check that fixed most of it.</span>
+          </a></li>
+          <li><a href="writing/ai-assistant/">
+            <span class="name">An AI assistant that works the account <span class="lang">AGENTS</span><span class="arr">&rarr;</span></span>
+            <span class="desc">A chat panel that answers from an account's own data and changes it, on the same tools as our MCP server, measured fix by fix.</span>
+          </a></li>
+          <li><a href="writing/aloware-mcp/">
+            <span class="name">Aloware MCP <span class="lang">MCP</span><span class="arr">&rarr;</span></span>
+            <span class="desc">167 tools that let Claude work inside an Aloware account as the person who signed in, with the page's own permission checks.</span>
+          </a></li>
+          <li><a href="writing/slack-bot/">
+            <span class="name">Aloware Bot <span class="lang">SLACK</span><span class="arr">&rarr;</span></span>
+            <span class="desc">An AI teammate in our Slack that reads accounts for admins, changes nothing, and keeps account data away from the web.</span>
+          </a></li>
+        </ul>
+      </section>
+
       <section id="oss" class="rv">
-        <div class="eyebrow"><span>YOU PRESSED</span><b>2</b><span>/ OPEN SOURCE</span></div>
+        <div class="eyebrow"><span>YOU PRESSED</span><b>3</b><span>/ OPEN SOURCE</span></div>
         <h2>Noise cancellation that <em>never leaves your server.</em></h2>
         <p class="body">
           <a href="https://github.com/aloware/livekit-plugins-dtln">livekit-plugins-dtln</a> is self-hosted
@@ -332,7 +358,7 @@
       </section>
 
       <section id="shipping" class="rv">
-        <div class="eyebrow"><span>YOU PRESSED</span><b>3</b><span>/ STILL SHIPPING</span></div>
+        <div class="eyebrow"><span>YOU PRESSED</span><b>4</b><span>/ STILL SHIPPING</span></div>
         <h2>Small things, built <em>end to end.</em></h2>
         <p class="body">
           Nights and weekends I ship complete little tools. It keeps my judgment calibrated
@@ -363,7 +389,7 @@
       </section>
 
       <section id="connect" class="rv">
-        <div class="eyebrow"><span>YOU PRESSED</span><b>4</b><span>/ CONNECT</span></div>
+        <div class="eyebrow"><span>YOU PRESSED</span><b>5</b><span>/ CONNECT</span></div>
         <h2>The line is <em>open.</em></h2>
         <p class="body">
           Always happy to talk to engineers who want to work on real-time voice AI.

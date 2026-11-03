@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aloware Bot · Sohrab Sheikhani</title>
+  <meta name="description" content="Aloware Bot answers questions in our Slack and, for our admins, looks into a customer's account. It changes nothing, and it is built so text it reads can't carry account data out.">
+  <link rel="canonical" href="https://sohrabz.github.io/writing/slack-bot/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../post.css">
+</head>
+<body>
+  <div class="col">
+    <nav class="top" aria-label="Site">
+      <a href="/"><span class="arr">&larr;</span>SOHRAB SHEIKHANI</a>
+      <a href="/#writing">WRITING</a>
+    </nav>
+
+    <header class="post">
+      <div class="eyebrow"><span>WRITING</span><b>04</b><span>/ SLACK</span></div>
+      <h1>Aloware Bot: <em>a teammate in Slack that only reads.</em></h1>
+      <p class="lede">
+        Aloware Bot answers questions in our Slack. It summarizes threads, reads files and alerts, and for our admins,
+        looks into a customer's account. It changes nothing, and it's built so the text it reads can't carry account
+        data out of Slack.
+      </p>
+      <p class="meta">2026-11-02 &middot; Written with Claude from the code, commit history and product docs.</p>
+    </header>
+
+    <article>
+      <h2>The short version</h2>
+      <ul class="stats">
+        <li><span class="k">Used by</span><span class="v"><strong>Support, Customer Success, Sales and Engineering</strong>, in Aloware's own workspace</span></li>
+        <li><span class="k">History</span><span class="v">A thread summarizer since <strong>December 2023</strong>, rebuilt as an agent in <strong>October 2026</strong></span></li>
+        <li><span class="k">Built</span><span class="v"><strong>276 of 285 commits</strong> are mine, and 99.6% of the lines in the code today</span></li>
+        <li><span class="k">Tools</span><span class="v">Up to <strong>16</strong> of its own; an admin who opens an account also gets the account's read-only tools</span></li>
+        <li><span class="k">Writes</span><span class="v"><strong>None.</strong> Its account tools &ldquo;can't send, call, edit, buy, enroll or import&rdquo;</span></li>
+        <li><span class="k">Tests</span><span class="v"><strong>572</strong> test methods</span></li>
+      </ul>
+
+      <h2>What people ask it</h2>
+      <p>
+        Mention <strong>@Aloware Bot</strong> in a thread, or DM it. A thread is one conversation, so a follow-up builds on
+        the answer before. Four commands give a fixed shape: a summary with what is done, in progress and blocked; key
+        points; who has to do what; and the thread's sentiment.
+      </p>
+      <p>
+        Anything else gets an answer written as it streams in. It can search the web, read PDFs, images and the app
+        alerts posted in a thread, and reply with files, canvases, tables, charts, images or buttons to pick from.
+        Aloware links in Slack turn into cards. The product docs give questions like these:
+      </p>
+      <ul>
+        <li>&ldquo;Why did this call go to voicemail?&rdquo;</li>
+        <li>&ldquo;Does this account show signs of fraud?&rdquo;</li>
+        <li>&ldquo;Who in the Support inbox can take a call right now?&rdquo;</li>
+      </ul>
+
+      <h2>How a reply runs</h2>
+      <ol>
+        <li><strong>Slack sends the event.</strong> The server checks Slack's signature over the body, within 5 minutes, and takes a lock on the message so Slack's retries are dropped.</li>
+        <li><strong>A queue job answers.</strong> It has one try. A run the worker kills skips its cleanup, so a retry would post the answer twice; instead, a failure posts an apology.</li>
+        <li><strong>Slack is the memory.</strong> Each run rebuilds the conversation from the thread: mentions are requests, the bot's messages are its answers, and everything else is context.</li>
+        <li><strong>The answer streams</strong> through Slack's agent view: a card per tool call, a Stop button, and Good/Bad buttons at the end. Each request is recorded with its tokens, tool calls, time and outcome.</li>
+      </ol>
+
+      <h2>From summarizer to agent</h2>
+      <p>
+        The bot started in December 2023 with one command, summarize. Key points, action items, sentiment and
+        free-form questions came in 2024. In October 2026 I rebuilt it on the Laravel AI SDK, the first AI agent in
+        our app code, and it now shares its table, chart, file and question tools with the
+        <a href="../ai-assistant/">AI Assistant</a>.
+      </p>
+      <p>
+        The rebuild started from a timing bug. The old driver retried every failure 10 times, behind a 10-minute timeout
+        that the 90-second worker never honored. The new one uses a fast model at low reasoning effort with a 30-second
+        request timeout, so two attempts fit inside the worker's 90 seconds.
+      </p>
+      <p>
+        Sentiment became a classification instead of a generation. A classifier picks the label in about 0.3 seconds.
+        Above 60% confidence the bot posts the verdict; below it, the reply says the sentiment is unclear and shows the
+        split, instead of a model's explanation stretching to fit one label.
+      </p>
+
+      <h2>Reading an account, for our admins only</h2>
+      <p>
+        Aloware admins can ask about a customer's account from Slack. The bot matches the asker to an admin by their Slack
+        account, and then:
+      </p>
+      <ul>
+        <li><strong>Only in our own channels.</strong> Admin tools are never offered in a channel shared with another organization. A missing &ldquo;shared&rdquo; flag counts as shared.</li>
+        <li><strong>Only an explicit list.</strong> The admin tools are named one by one, so a write tool added to the server later is not offered in Slack by accident.</li>
+        <li><strong>Read-only and free.</strong> Opening an account adds the same read-only reader our Super Admin chat uses, filtered to tools that change nothing and cost nothing.</li>
+        <li><strong>Audited.</strong> Every read is recorded under the admin who asked.</li>
+      </ul>
+
+      <h2>Keeping account data in Slack</h2>
+      <p>
+        A thread, a file or a web page can contain text written to steer the model. The risk worth designing for is that
+        text getting account data into a search query or an image URL. The guards:
+      </p>
+      <ul>
+        <li><strong>Account data and the web never share a reply.</strong> Once a reply has read account data, web search and images are off for the rest of it.</li>
+        <li><strong>Only mentions are requests.</strong> The rest of the thread is context, and a person's request sits in the user turn, not the system instructions, so it carries no system-prompt weight.</li>
+        <li><strong>Names are capped.</strong> Anyone can set their own Slack name, so names are cut to 80 characters before they reach an image prompt.</li>
+        <li><strong>No crowd pings.</strong> @here, @channel and group mentions in a reply are muted.</li>
+        <li><strong>Private stays private.</strong> An image from another conversation is used only if it's in a public channel the asker belongs to, and every refusal reads the same so it reveals nothing. A planned &ldquo;summarize this link&rdquo; command was dropped because a link could expose a private channel.</li>
+        <li><strong>Less kept.</strong> Message text stays out of logs and error reports, the model provider's storage is off, and the bot's token is only ever sent to Slack's file host.</li>
+      </ul>
+
+      <h2>The same consent, asked in a different place</h2>
+      <p>
+        One tool runs in both the bot and the AI Assistant: sending a feature request to our team. In the AI Assistant,
+        the request waits on an approval card showing exactly what will be sent. In Slack, the bot offers to send it and
+        sends once the person agrees in the thread. A test pins that difference, so a change to one doesn't quietly
+        change the other.
+      </p>
+
+      <ul class="next" aria-label="More writing">
+        <li><a href="../classifier-gated-agent-actions/"><span class="name">Classifier-gated agent actions<span class="arr">&rarr;</span></span><span class="desc">200 cases against the classifier that lets an AI agent act without asking: its blind spot, and the per-value check that fixed most of it.</span></a></li>
+        <li><a href="../ai-assistant/"><span class="name">An AI assistant that works the account<span class="arr">&rarr;</span></span><span class="desc">A chat panel that answers from an account's own data and changes it, on the same tools as our MCP server, measured fix by fix.</span></a></li>
+        <li><a href="../aloware-mcp/"><span class="name">Aloware MCP<span class="arr">&rarr;</span></span><span class="desc">167 tools that let Claude work inside an Aloware account as the person who signed in, with the page's own permission checks.</span></a></li>
+      </ul>
+    </article>
+
+    <footer>
+      <span>&copy; 2026 SOHRAB SHEIKHANI</span>
+      <a href="/">&larr; MAIN MENU</a>
+    </footer>
+  </div>
+</body>
+</html>
